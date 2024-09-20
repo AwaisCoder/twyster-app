@@ -13,7 +13,8 @@
     "@tanstack/react-query": "^5.56.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-hot-toast": "^2.4.1"
+    "react-hot-toast": "^2.4.1",
+    "twyster-3": "file:.."
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
