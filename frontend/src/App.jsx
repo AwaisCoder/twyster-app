@@ -5,6 +5,7 @@ import SignUpPage from './pages/auth/signup/SignUpPage';
 import LoginPage from './pages/auth/login/LoginPage';
 import NotificationPage from './pages/notification/NotificationPage';
 import ProfilePage from './pages/profile/ProfilePage';
+import SearchPage from './pages/search/SearchPage';
 
 import Sidebar from './components/common/Sidebar';
 import RightPanel from './components/common/Rightpanel';
@@ -54,6 +55,7 @@ function App() {
         <Route path='/signup' element={!authUser ? <SignUpPage /> : <Navigate to="/" />} />
         <Route path='/notifications' element={authUser ? <NotificationPage /> : <Navigate to="/login" />} />
         <Route path='/profile/:username' element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
+        <Route path='/search' element={authUser ? <SearchPage /> : <Navigate to="/login" />} />
       </Routes>
       {authUser && <RightPanel />}
       <Toaster />

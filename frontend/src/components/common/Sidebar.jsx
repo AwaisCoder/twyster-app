@@ -1,17 +1,38 @@
-import XSvg from "../svgs/X";
+//import XSvg from "../svgs/X";
 
 import { MdHomeFilled } from "react-icons/md";
 import { IoNotifications } from "react-icons/io5";
+import { AiOutlineSearch } from "react-icons/ai";
 import { FaUser } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { BiLogOut } from "react-icons/bi";
 import toast from "react-hot-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 
 const Sidebar = () => {
 	const queryClient = useQueryClient();
-	const { mutate: logout, isError, error } = useMutation({
+	const [hasUnread, setHasUnread] = useState(false);
+
+	const { data: { notifications, hasUnread: serverHasUnread } = { notifications: [], hasUnread: false } } = useQuery({
+		queryKey: ['notifications'],
+		queryFn: async () => {
+			const res = await fetch('/api/notifications');
+			const data = await res.json();
+			if (!res.ok) {
+				throw new Error(data.error || 'Something went wrong!')
+			}
+			return data;
+		},
+		onSuccess: (data) => {
+			console.log("Notifications:", data.notifications);
+			console.log("Has unread:", data.hasUnread);
+			setHasUnread(data.hasUnread);
+		},
+	});
+
+	const { mutate: logout } = useMutation({
 		mutationFn: async () => {
 			try {
 				const res = await fetch('/api/auth/logout', {
@@ -41,9 +62,21 @@ const Sidebar = () => {
 	return (
 		<div className='md:flex-[2_2_0] w-18 max-w-52'>
 			<div className='sticky top-0 left-0 h-screen flex flex-col border-r border-gray-700 w-20 md:w-full'>
+				{/* Top-left logo - PNG */}
 				<Link to='/' className='flex justify-center md:justify-start'>
-					<XSvg className='px-2 w-12 h-12 rounded-full fill-white hover:bg-stone-900' />
+					<img
+						src='/Twyster2.png'
+						alt='Logo'
+						className='px-1 rounded-full object-contain fill-white hover:bg-stone-900 -ml-2 mt-3'
+						style={{
+							width: '75px',
+							height: '75px',
+							aspectRatio: '1 / 1'
+						}}
+					/>
 				</Link>
+
+
 				<ul className='flex flex-col gap-3 mt-4'>
 					<li className='flex justify-center md:justify-start'>
 						<Link
@@ -57,12 +90,29 @@ const Sidebar = () => {
 					<li className='flex justify-center md:justify-start'>
 						<Link
 							to='/notifications'
-							className='flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer'
+							className='relative flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer'
 						>
 							<IoNotifications className='w-6 h-6' />
+							{/* Red dot if unread notifications exist */}
+							{serverHasUnread && (
+								<span className="absolute top-0 right-0 w-4 h-4 bg-red-600 rounded-full border-2 border-white"></span>
+							)}
 							<span className='text-lg hidden md:block'>Notifications</span>
 						</Link>
 					</li>
+
+
+
+					<li className='flex justify-center md:justify-start'>
+						<Link
+							to='/search'
+							className='flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer'
+						>
+							<AiOutlineSearch className='w-6 h-6' />
+							<span className='text-lg hidden md:block'>Search</span>
+						</Link>
+					</li>
+
 
 					<li className='flex justify-center md:justify-start'>
 						<Link

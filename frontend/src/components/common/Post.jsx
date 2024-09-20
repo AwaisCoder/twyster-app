@@ -170,7 +170,7 @@ const Post = ({ post }) => {
 									<div className='flex flex-col gap-3 max-h-60 overflow-auto'>
 										{post.comments.length === 0 && (
 											<p className='text-sm text-slate-500'>
-												No comments yet? 🤔 Be the first one! 😉
+												No comments yet? Be the first one!
 											</p>
 										)}
 										{post.comments.map((comment) => (

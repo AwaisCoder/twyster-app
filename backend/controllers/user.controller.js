@@ -151,3 +151,22 @@ export const updateUser = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+export const searchUsers = async (req, res) => {
+    const { query } = req.query;
+
+    if (!query) return res.status(400).json({ error: "Please provide a search query" });
+
+    try {
+        const users = await User.find({
+            username: { $regex: query, $options: "i" },
+        }).select("username fullName profileImg");
+
+        if (!users) return res.status(404).json({ error: "No users found" });
+
+        res.status(200).json(users);
+    } catch (error) {
+        console.log("Error in searchUsers: ", error.message);
+        res.status(500).json({ error: error.message });
+    }
+};

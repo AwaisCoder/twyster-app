@@ -59,6 +59,8 @@ const CreatePost = () => {
 		}
 	};
 
+
+
 	return (
 		<div className='flex p-4 items-start gap-4 border-b border-gray-700'>
 			<div className='avatar'>

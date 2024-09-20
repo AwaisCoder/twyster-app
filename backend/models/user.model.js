@@ -1,24 +1,25 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-    username:{
+    username: {
         type: String,
         required: true,
         unique: true,
+        index: true,
     },
 
-    fullName:{
+    fullName: {
         type: String,
         required: true,
     },
 
-    password:{
+    password: {
         type: String,
         required: true,
         minLength: 6,
     },
 
-    email:{
+    email: {
         type: String,
         required: true,
         unique: true,
@@ -40,22 +41,22 @@ const userSchema = new mongoose.Schema({
         }
     ],
 
-    profileImg:{
+    profileImg: {
         type: String,
         default: "",
     },
 
-    coverImg:{
+    coverImg: {
         type: String,
         default: "",
     },
 
-    bio:{
+    bio: {
         type: String,
         default: "",
     },
 
-    link:{
+    link: {
         type: String,
         default: "",
     },
@@ -66,9 +67,10 @@ const userSchema = new mongoose.Schema({
             default: []
         },
     ],
-  },
-  { timestamps: true }
-);
+},
+    { timestamps: true });
+
+userSchema.index({ username: 1 });
 
 const User = mongoose.model("User", userSchema);
 
