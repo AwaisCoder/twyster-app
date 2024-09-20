@@ -8,7 +8,7 @@ import ProfilePage from './pages/profile/ProfilePage';
 import SearchPage from './pages/search/SearchPage';
 
 import Sidebar from './components/common/Sidebar';
-import RightPanel from './components/common/Rightpanel';
+import RightPanel from './components/common/RightPanel';
 
 import { Toaster } from 'react-hot-toast';
 import { useQuery } from '@tanstack/react-query';
