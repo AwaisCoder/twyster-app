@@ -91,6 +91,7 @@ export const getSuggestedUsers = async (req, res) => {
     }
 };
 
+
 export const updateUser = async (req, res) => {
     const { fullName, username, email, currentPassword, newPassword, bio, link } = req.body;
     let { profileImg, coverImg } = req.body;
@@ -170,3 +171,24 @@ export const searchUsers = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+// Fetch the user's current theme preference
+{/*export const getUserTheme = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select('theme'); // Assuming you have a 'theme' field
+        res.json({ theme: user.theme });
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+// Update the user's theme preference
+export const updateUserTheme = async (req, res) => {
+    try {
+        const { theme } = req.body; // Get the new theme from the request body
+        await User.findByIdAndUpdate(req.user.id, { theme });
+        res.status(200).json({ message: 'Theme updated successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+};*/}

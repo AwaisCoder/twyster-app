@@ -8,6 +8,9 @@ import { getAllPosts } from "../controllers/post.controller.js";
 import { getLikedPosts } from "../controllers/post.controller.js";
 import { getFollowingPosts } from "../controllers/post.controller.js";
 import { getUserPosts } from "../controllers/post.controller.js";
+import { retweetPost } from "../controllers/post.controller.js";
+import { bookmarkPost } from "../controllers/post.controller.js";
+import { getBookmarkedPosts } from "../controllers/post.controller.js";
 
 const router = express.Router();
 
@@ -19,5 +22,8 @@ router.delete("/:id", protectRoute, deletePost);
 router.post("/like/:id", protectRoute, likeUnlikePost);
 router.get("/user/:username", protectRoute, getUserPosts);
 router.post("/comment/:id", protectRoute, commentOnPost);
+router.post("/retweet/:id", protectRoute, retweetPost);
+router.post("/bookmark/:id", protectRoute, bookmarkPost);
+router.get("/bookmarks/:id", protectRoute, getBookmarkedPosts);
 
 export default router;

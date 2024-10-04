@@ -33,7 +33,7 @@ const SearchPage = () => {
     return (
         <div className='flex-1 border-l border-r border-gray-700 min-h-screen p-4'>
             <div className='mb-6'>
-                <div className='font-bold mb-2 text-gray-100'>Search</div>
+                <div className='font-bold mb-2 text-2xl'>Search</div>
                 <div className='form-control'>
                     <div className='input-group flex items-center'>
                         <input

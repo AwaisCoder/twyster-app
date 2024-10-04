@@ -1,7 +1,7 @@
 import { FaRegComment } from "react-icons/fa";
-import { BiRepost } from "react-icons/bi";
-import { FaRegHeart } from "react-icons/fa";
-import { FaRegBookmark } from "react-icons/fa6";
+import { BiRepost } from 'react-icons/bi';
+import { FaRegHeart, FaHeart } from "react-icons/fa";
+import { FaRegBookmark, FaBookmark } from "react-icons/fa6";
 import { FaTrash } from "react-icons/fa";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -9,6 +9,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import LoadingSpinner from "./LoadingSpinner";
 import { formatPostDate } from "../../utils/date";
+
+
 
 const Post = ({ post }) => {
 	const [comment, setComment] = useState("");
@@ -18,6 +20,9 @@ const Post = ({ post }) => {
 	const isLiked = post.likes.includes(authUser._id);
 	const isMyPost = authUser._id === postOwner._id;
 	const formattedDate = formatPostDate(post.createdAt);
+	const isRetweeted = post.retweets.includes(authUser._id);
+	const isBookmarked = authUser.bookmarks.includes(post._id);
+
 
 
 	const { mutate: deletePost, isPending: isDeleting } = useMutation({
@@ -99,6 +104,69 @@ const Post = ({ post }) => {
 		},
 	});
 
+	const { mutate: retweetPost, isLoading: isRetweeting } = useMutation({
+		mutationFn: async () => {
+			try {
+				const res = await fetch(`/api/posts/retweet/${post._id}`, {
+					method: "POST",
+				});
+				const data = await res.json();
+
+				if (!res.ok) {
+					throw new Error(JSON.stringify(data));  // Pass the entire error response
+				}
+				return data;
+			} catch (error) {
+				throw new Error(error.message);
+			}
+		},
+		onSuccess: () => {
+			toast.success("Post retweeted successfully!");
+			queryClient.invalidateQueries({ queryKey: ["posts"] });  // Ensure the UI updates after retweet
+		},
+		onError: (error) => {
+			// Parse the error message
+			let errorMessage = "An error occurred";
+			try {
+				const errorData = JSON.parse(error.message);
+				if (errorData.errorType === "already_retweeted_post") {
+					errorMessage = "This post has already been retweeted!";
+				} else if (errorData.errorType === "already_retweeted_by_user") {
+					errorMessage = "You've already retweeted this post!";
+				}
+			} catch (err) {
+				console.error("Failed to parse error:", err);
+			}
+
+			toast.error(errorMessage);
+		},
+	});
+
+	const { mutate: bookmarkPost, isLoading: isBookmarking } = useMutation({
+		mutationFn: async () => {
+			try {
+				const res = await fetch(`/api/posts/bookmark/${post._id}`, {
+					method: "POST",
+				});
+				const data = await res.json();
+
+				if (!res.ok) {
+					throw new Error(data.error || "Something went wrong!");
+				}
+				return data;
+			} catch (error) {
+				throw new Error(error);
+			}
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["posts"] });
+		},
+		onError: (error) => {
+			toast.error(error.message);
+		},
+	});
+
+
 
 	const handleDeletePost = () => {
 		deletePost();
@@ -114,6 +182,17 @@ const Post = ({ post }) => {
 		if (isLiking) return;
 		likPost();
 	};
+
+	const handleRetweetPost = () => {
+		if (isRetweeting) return;  // Prevent multiple retweets while one is pending
+		retweetPost();  // Trigger the retweet mutation
+	};
+
+	const handleBookmarkPost = () => {
+		if (isBookmarking) return;
+		bookmarkPost();
+	};
+
 
 	return (
 		<>
@@ -158,7 +237,7 @@ const Post = ({ post }) => {
 								className='flex gap-1 items-center cursor-pointer group'
 								onClick={() => document.getElementById("comments_modal" + post._id).showModal()}
 							>
-								<FaRegComment className='w-4 h-4  text-slate-500 group-hover:text-sky-400' />
+								<FaRegComment className='w-4 h-4  text-slate-500 group-hover:text-indigo-400' />
 								<span className='text-sm text-slate-500 group-hover:text-sky-400'>
 									{post.comments.length}
 								</span>
@@ -214,30 +293,51 @@ const Post = ({ post }) => {
 									<button className='outline-none'>close</button>
 								</form>
 							</dialog>
-							<div className='flex gap-1 items-center group cursor-pointer'>
-								<BiRepost className='w-6 h-6  text-slate-500 group-hover:text-green-500' />
-								<span className='text-sm text-slate-500 group-hover:text-green-500'>0</span>
-							</div>
-							<div className='flex gap-1 items-center group cursor-pointer' onClick={handleLikePost}>
-								{isLiking && <LoadingSpinner size='sm' />}
-								{!isLiked && !isLiking && (
-									<FaRegHeart className='w-4 h-4 cursor-pointer text-slate-500 group-hover:text-pink-500' />
+							<div className='flex gap-1 items-center group cursor-pointer' onClick={handleRetweetPost}>
+								{isRetweeting && <LoadingSpinner size='sm' />}
+								{!isRetweeted && !isRetweeting && (
+									<BiRepost className='w-6 h-6 cursor-pointer text-slate-500 group-hover:text-green-500' />
 								)}
-								{isLiked && !isLiking && (
-									<FaRegHeart className='w-4 h-4 cursor-pointer text-pink-500 ' />
+								{isRetweeted && !isRetweeting && (
+									<BiRepost className='w-6 h-6 cursor-pointer text-green-500' />
 								)}
 
 								<span
-									className={`text-sm text-slate-500 group-hover:text-pink-500 ${isLiked ? "text-pink-500" : ""
-										}`}
+									className={`text-sm text-slate-500 group-hover:text-green-500 ${isRetweeted ? "text-green-500" : ""}`}
+								>
+									{post.retweets.length}
+								</span>
+							</div>
+
+							<div className='flex gap-1 items-center group cursor-pointer' onClick={handleLikePost}>
+								{isLiking && <LoadingSpinner size='sm' />}
+								{!isLiked && !isLiking && (
+									<FaRegHeart className='w-4 h-4 cursor-pointer text-slate-500 group-hover:text-red-600' />
+								)}
+								{isLiked && !isLiking && (
+									<FaHeart className='w-4 h-4 cursor-pointer text-red-600' /> // Use filled heart icon here
+								)}
+
+								<span
+									className={`text-sm text-slate-500 group-hover:text-red-600 ${isLiked ? "text-red-600" : "text-slate-500"}`}
 								>
 									{post.likes.length}
 								</span>
 							</div>
 						</div>
-						<div className='flex w-1/3 justify-end gap-2 items-center'>
-							<FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer' />
+						<div className='flex gap-1 items-center group cursor-pointer' onClick={handleBookmarkPost}>
+							{isBookmarking && <LoadingSpinner size='sm' />}
+							{!isBookmarked && !isBookmarking && (
+								<FaRegBookmark className='w-4 h-4 text-slate-500 group-hover:text-blue-500' />
+							)}
+							{isBookmarked && !isBookmarking && (
+								<FaBookmark className='w-4 h-4 text-blue-500' />
+							)}
+							{/* This is where the number/count and color change happens */}
+							<span className={`text-sm ${isBookmarked ? 'text-blue-800' : 'text-slate-500'}`}>
+							</span>
 						</div>
+
 					</div>
 				</div>
 			</div>
